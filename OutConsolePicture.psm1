@@ -67,7 +67,7 @@ function Out-ConsolePicture {
 
 		if ($Host.Name -eq "Windows PowerShell ISE Host") {
 			# ISE neither supports ANSI, nor reports back a width for resizing.
-			Write-Warning "ISE does not support ANSI colors. No images for you. Sorry! :("
+			Write-Warning "ISE does not support ANSI colors."
 			Break
 		}
 		
@@ -88,7 +88,7 @@ function Out-ConsolePicture {
 			# If it's a recognized bitmap
 			if ($_ -is [System.Drawing.Bitmap]) {
 				
-				# Resize image if explicitly told not to
+				# Resize image unless explicitly told not to
 				if (-not $DoNotResize) {
 
                     # If we're not given a width, or it's too large set to full width
@@ -107,7 +107,7 @@ function Out-ConsolePicture {
                     $width = $Host.UI.RawUI.BufferSize.Width;
                 }
 				
-				$color_string = New-Object System.Text.StringBuilder
+				$all_pixel_pairs = New-Object System.Text.StringBuilder
 				
 				# For each row of pixels in image
 				for ($y = 0; $y -lt $_.Height; $y++) {
@@ -118,7 +118,7 @@ function Out-ConsolePicture {
 					else {
 						if($y -gt 0) {
 							# Add linebreaks after every row, if we're not on the first row
-							[void]$color_string.append($line_break_char)
+							[void]$all_pixel_pairs.append($line_break_char)
 						}
 					}
 					
@@ -128,7 +128,7 @@ function Out-ConsolePicture {
 						# Reset variables
 						$fg_transparent, $bg_transparent = $false, $false
 						$color_bg, $color_fg = $null, $null
-						$pixel = ""
+						$pixel_pair = ""
 						
 						# Determine foreground color and transparency state
 						$color_fg = $_.GetPixel($x, $y)
@@ -153,7 +153,7 @@ function Out-ConsolePicture {
 						
 						# If both top/bottom pixels are transparent, just use an empty space as a fully "transparent" pixel pair
 						if($fg_transparent -and $bg_transparent){
-							$pixel = " "
+							$pixel_pair = " "
 						}
 						# Otherwse determine which to render and which not to render
 						else{
@@ -166,7 +166,7 @@ function Out-ConsolePicture {
 							
 							# If our top character is transparent but bottom isnt, we can't render the foreground as transparent and also have a background.
 							if($fg_transparent -and -not $bg_transparent){
-								# We need to flip the logic,
+								# We need to invert the logic,
 								
 								# So use the bottom-half char to render instead
 								$character_to_use = $bottom_half_char
@@ -182,30 +182,30 @@ function Out-ConsolePicture {
 							# If the fg (top pixel) is not transparent, give it a character with color
 							if(-not $fg_transparent){
 								# Draw a foreground
-								$pixel += "$([char]27)[38;2;{0};{1};{2}m" -f $color_fg.r, $color_fg.g, $color_fg.b
+								$pixel_pair += "$([char]27)[38;2;{0};{1};{2}m" -f $color_fg.r, $color_fg.g, $color_fg.b
 							}
 							# If the bg (bottom pixel) is not transparent, give it a character with color
 							if(-not $bg_transparent){
 								# Draw a background
-								$pixel += "$([char]27)[48;2;{0};{1};{2}m" -f $color_bg.r, $color_bg.g, $color_bg.b
+								$pixel_pair += "$([char]27)[48;2;{0};{1};{2}m" -f $color_bg.r, $color_bg.g, $color_bg.b
 							}
 							
 							# Add the actual character to render
-							$pixel += $character_to_use
+							$pixel_pair += $character_to_use
 							
 							# Reset the style to prepare for the next pixel
-							$pixel += "$([char]27)[0m"
+							$pixel_pair += "$([char]27)[0m"
 						}                            
 
 						# Add the pixel-pair to the string builder
-						[void]$color_string.Append($pixel)
+						[void]$all_pixel_pairs.Append($pixel_pair)
 					}
 				}
 
 				# Write the colors to the console based on alignment
 				if($Align -eq "Left"){
 					# Left is the default
-					$color_string.ToString()
+					$all_pixel_pairs.ToString()
 				}
 				else{
 					# Right and Center require padding be added to each line
@@ -221,7 +221,7 @@ function Out-ConsolePicture {
 					}
 
 					# Print each line with required padding
-					$color_string.ToString().Split($line_break_char) |% {
+					$all_pixel_pairs.ToString().Split($line_break_char) |% {
 						Write-Host (" "*$padding+$_)
 					}
 				}
@@ -230,9 +230,10 @@ function Out-ConsolePicture {
 			}
 		}
 	}
-	
+
 	end {
 	}
+
 	<#
 .SYNOPSIS
 	Renders an image to the console
@@ -254,11 +255,11 @@ Default 255; Pixels with an alpha (opacity) value less than this are rendered as
 Default 'Left'; Align image to the Left, Right, or Center of the terminal. Must be used in conjuction with the Width parameter.
 
 .EXAMPLE
-	Out-ConsolePicture ".\someimage.jpg"
+	Out-ConsolePicture ".\someimage.png"
 	Renders the image to console
 
 .EXAMPLE
-	Out-ConsolePicture -Url "http://somewhere.com/image.jpg"
+	Out-ConsolePicture -Url "http://somewhere.com/image.png"
 	Renders the image to console
 
 .EXAMPLE
@@ -269,6 +270,6 @@ Default 'Left'; Align image to the Left, Right, or Center of the terminal. Must 
 .INPUTS
 	One or more System.Drawing.Bitmap objects
 .OUTPUTS
-	Gloriously coloured console output
+	The image rendered as console output
 #>
 }
