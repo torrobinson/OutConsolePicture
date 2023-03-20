@@ -1,15 +1,22 @@
+
 # OutConsolePicture
-Powershell cmdlet for rendering image files to console
+This is a PowerShell cmdlet for rendering images to console.
+It does this by fetching either local or remote image, breaking it down into pairs of top/bottom pixels, and rendering those pairs as ASCII block characters.
 
-# How to install?
-The module is published to the Powershell Gallery, so get it from there with `Install-Module -Name OutConsolePicture`
+# Examples
+## Large images		
+![Large Image](documentation/large-image.png)
 
-# Result
-![Dandelion](https://i.imgur.com/80gucpA.png)
+## Alignment
+![Alignment](documentation/alignment-examples.png)
+## Local image from path
+![Local Source](documentation/from-file.png)
 
+## Remote image from URL
+![Remote Source](documentation/url-example.png)
 # Documentation
 
-Straight from the module help:
+From the module definition file:
 
 ```
 NAME
@@ -139,15 +146,7 @@ OUTPUTS
     $image | Out-ConsolePicture
     Creates a new Bitmap object from a file on disk renders it to the console
 
-
-
-
-
-
-
-RELATED LINKS
 ```
+# Attribution
+ This was initially based off of [NotNotWrongUsually/OutConsolePicture](https://github.com/NotNotWrongUsually/OutConsolePicture) but was splintered, after years of inactivity, to include things like transparency, alignment support, and any improvements going forward!
 
-# License
-You can copy it, change it, or stick it in your hat;
-But never charge a penny for it - simple as that!
