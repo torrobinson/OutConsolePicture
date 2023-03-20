@@ -28,9 +28,17 @@ function Out-ConsolePicture {
 	)
 	
 	begin {
+
+        # If the source is from the pipeline
+        if ($PSCmdlet.ParameterSetName -eq "FromPipeline") {
+            # ... do nothing, because it's already captured
+		}
+
+        # If it's coming from a local path
 		if ($PSCmdlet.ParameterSetName -eq "FromPath") {
 			foreach ($file in $Path) {
 				try {
+                    # Read and append
 					$image = New-Object System.Drawing.Bitmap -ArgumentList "$(Resolve-Path $file)"
 					$InputObject += $image
 				}
@@ -40,11 +48,15 @@ function Out-ConsolePicture {
 			}
 		}
 
+        # If it's coming from a remote path
 		if ($PSCmdlet.ParameterSetName -eq "FromWeb") {
 			foreach ($uri in $Url) {
+    
+                # Download it
 				try {
 					$data = (Invoke-WebRequest $uri).RawContentStream    
 				}
+                # Handle redirects and grab actual endpoint
 				catch [Microsoft.PowerShell.Commands.HttpResponseException] {
 					if ($_.Exception.Response.statuscode.value__ -eq 302) {
 						$actual_location = $_.Exception.Response.Headers.Location.AbsoluteUri
@@ -56,6 +68,7 @@ function Out-ConsolePicture {
 				}
 				
 				try {
+                    # Read the downloaded image data into an image
 					$image = New-Object System.Drawing.Bitmap -ArgumentList $data
 					$InputObject += $image
 				}
@@ -65,6 +78,7 @@ function Out-ConsolePicture {
 			}
 		}
 
+        # Ensure user is not using the PowerShell ISE
 		if ($Host.Name -eq "Windows PowerShell ISE Host") {
 			# ISE neither supports ANSI, nor reports back a width for resizing.
 			Write-Warning "ISE does not support ANSI colors."
