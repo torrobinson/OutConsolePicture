@@ -24,7 +24,13 @@ function Out-ConsolePicture {
 
 		[Parameter()]
 		[ValidateSet("Left","Center","Right")]
-		[string]$Align = "Left"
+		[string]$Align = "Left",
+
+        [Parameter()]
+		[int]$AnimationFrameDelayMilliseconds = 200,
+
+        [Parameter()]
+		[int]$AnimationPlayCount = $null
 	)
 	
 	begin {
@@ -267,6 +273,10 @@ Renders the image at this specific width. Use of the width parameter overrides D
 Default 255; Pixels with an alpha (opacity) value less than this are rendered as fully transparent. Fully opaque = 255. Lowering the value will require a pixel to be more transparent to vanish, and will therefor include more pixels.
 .PARAMETER Align
 Default 'Left'; Align image to the Left, Right, or Center of the terminal. Must be used in conjuction with the Width parameter.
+.PARAMETER AnimationFrameDelayMilliseconds
+Default 200; If the image is an animation, how long to display each frame on screen.
+.PARAMETER AnimationPlayCount
+Default $null; If the image is an animation, how many times to loop the animation. If $null, the image will look indefinitely until execution is cancelled.
 
 .EXAMPLE
 	Out-ConsolePicture ".\someimage.png"

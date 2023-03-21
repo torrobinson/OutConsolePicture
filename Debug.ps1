@@ -1,7 +1,8 @@
- # TEST pull frames
+﻿ # TEST pull frames
  Add-Type -Assembly 'System.Drawing'
  #$uri = "https://i.imgur.com/Y50DrsD.png"
- $uri = "https://cdn3.emoji.gg/emojis/7191-hersheyparkspin.gif"
+ #$uri = "https://cdn3.emoji.gg/emojis/7191-hersheyparkspin.gif"
+ $uri = "https://cdn3.emoji.gg/emojis/PusheenRice.gif"
  $data = (Invoke-WebRequest $uri).RawContentStream
  $image = New-Object System.Drawing.Bitmap -ArgumentList $data
 
@@ -47,7 +48,7 @@ Import-Module -Name "$($PSScriptRoot)\OutConsolePicture.psm1" -Force
 # TEMPORARY: Animation playground
 $height = 32;
 $frameDelayInMs = 10;
-$playCount = 3;
+$playCount = 10;
  
  # Disable the cursor
 [console]::CursorVisible = $false
@@ -71,8 +72,13 @@ foreach($iterationIndex in 0..($playCount-1)){
             # Pause in-between frames
             Start-Sleep -Milliseconds $frameDelayInMs
 
+            $rollbackPosition = $Host.UI.RawUI.CursorPosition.Y - ($height / 2);
+            if($rollbackPosition -lt 0){
+                $rollbackPosition = 0
+            }
+
             # And roll the cursor back to prepare to overwrite the last frame
-            [Console]::SetCursorPosition(0, $Host.UI.RawUI.CursorPosition.Y - ($height / 2)) # Divide by two because we use 1 row per 2 pixels
+            [Console]::SetCursorPosition(0, $rollbackPosition) # Divide by two because we use 1 row per 2 pixels
         }
 
         # Increment frame index
@@ -83,3 +89,17 @@ foreach($iterationIndex in 0..($playCount-1)){
 
  # Enable the cursor
 [console]::CursorVisible = $false
+
+"
+
+██╗    ██╗███████╗██╗      ██████╗ ██████╗ ███╗   ███╗███████╗
+██║    ██║██╔════╝██║     ██╔════╝██╔═══██╗████╗ ████║██╔════╝
+██║ █╗ ██║█████╗  ██║     ██║     ██║   ██║██╔████╔██║█████╗  
+██║███╗██║██╔══╝  ██║     ██║     ██║   ██║██║╚██╔╝██║██╔══╝  
+╚███╔███╔╝███████╗███████╗╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗
+ ╚══╝╚══╝ ╚══════╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝
+                                                                                                                                             
+".Split([System.Environment]::NewLine,[System.StringSplitOptions]::RemoveEmptyEntries) | %{
+	Start-Sleep -Seconds 0.1
+	Write-Centered -ForegroundColor Red -Message $_
+}
